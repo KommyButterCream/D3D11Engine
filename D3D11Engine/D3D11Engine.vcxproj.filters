@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{bf5e44ef-3885-4cc6-a9d3-a8b1135e3a65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{fde29d2c-b2bb-4271-ab4e-4acd123ffd16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Font">
+      <UniqueIdentifier>{28aa0695-5568-48fa-8968-05fc39626e9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{4dc391b4-8a0f-4af7-8991-9e9f51fa7ef7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{3caa8d53-a9c2-4d37-8718-40ba94c3fc54}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Camera\Camera2D.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Core\D3D11RenderContext.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Core\D3D11RenderEngine.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Font\FontManager.h">
+      <Filter>Font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Font\FontManagerImpl.h">
+      <Filter>Font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util\HighResTimer.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util\PtrArray.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util\SmoothValue.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Camera\Camera2D.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Core\D3D11RenderContext.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Core\D3D11RenderEngine.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Font\FontManager.cpp">
+      <Filter>Font</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Font\FontManagerImpl.cpp">
+      <Filter>Font</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\HighResTimer.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\SmoothValue.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Shader\ImagePS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\ImageVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\SingleConvertCS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\TileSamplingCS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\WireFramePS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
