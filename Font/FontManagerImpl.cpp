@@ -52,7 +52,7 @@ void FontManagerImpl::Clear()
 	{
 		if (font.second)
 		{
-			SafeRelease(&font.second);
+			SafeRelease(font.second);
 		}
 	}
 	m_fontMap.clear();

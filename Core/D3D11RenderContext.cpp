@@ -2,10 +2,10 @@
 #include "D3D11RenderContext.h"
 #include "D3D11RenderEngine.h" // 사용되는 engine의 public API 접근
 
-#include "HighResTimer.h"
+#include "../util/HighResTimer.h"
 
-#include "../Modules/D3D11EngineInterface/IDeviceEventListener.h"
-#include "../Modules/D3D11EngineInterface/IResizeEventListener.h"
+#include "../../../Module/D3D11EngineInterface/IDeviceEventListener.h"
+#include "../../../Module/D3D11EngineInterface/IResizeEventListener.h"
 
 D3D11RenderContext::D3D11RenderContext(D3D11RenderEngine* engine)
 	: m_engine(engine)
@@ -291,7 +291,7 @@ HRESULT D3D11RenderContext::CreateSwapChain(uint32_t width, uint32_t height)
 	);
 
 	if (m_swapChain)
-		SafeRelease(&m_swapChain);
+		SafeRelease(m_swapChain);
 
 	m_swapChain = swapChain;
 	return S_OK;
@@ -337,7 +337,7 @@ HRESULT D3D11RenderContext::CreateBackBufferResources()
 	if (FAILED(hr))
 	{
 		// D2D only path면 fatal 아님
-		SafeRelease(&m_rtv);
+		SafeRelease(m_rtv);
 		return hr;
 	}
 
@@ -439,12 +439,12 @@ void D3D11RenderContext::ReleaseBackBufferResources()
 	}
 
 	// D2D
-	SafeRelease(&m_d2dTargetBitmap);
-	SafeRelease(&m_dxgiBackBufferSurface);
+	SafeRelease(m_d2dTargetBitmap);
+	SafeRelease(m_dxgiBackBufferSurface);
 
 	// D3D
-	SafeRelease(&m_rtv);
-	SafeRelease(&m_backBuffer);
+	SafeRelease(m_rtv);
+	SafeRelease(m_backBuffer);
 
 	m_resourcesCreated = false;
 }
@@ -452,9 +452,9 @@ void D3D11RenderContext::ReleaseBackBufferResources()
 void D3D11RenderContext::ReleaseAllResources()
 {
 	ReleaseBackBufferResources();
-	SafeRelease(&m_swapChain);
-	SafeRelease(&m_d2dContext);
-	SafeRelease(&m_d2dContext5);
+	SafeRelease(m_swapChain);
+	SafeRelease(m_d2dContext);
+	SafeRelease(m_d2dContext5);
 
 	//m_d2dContext5 = nullptr;
 
@@ -481,9 +481,9 @@ bool D3D11RenderContext::HandleDeviceLost(HRESULT hr)
 	ReleaseBackBufferResources();
 
 	// 2. swapchain, d2d context 해제
-	SafeRelease(&m_swapChain);
-	SafeRelease(&m_d2dContext);
-	SafeRelease(&m_d2dContext5);
+	SafeRelease(m_swapChain);
+	SafeRelease(m_d2dContext);
+	SafeRelease(m_d2dContext5);
 	//m_d2dContext5 = nullptr;
 
 	// 3. engine device 재생성

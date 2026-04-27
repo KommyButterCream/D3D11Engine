@@ -21,19 +21,6 @@
 #include <wincodec.h>
 #include <wincodecsdk.h>
 
-#include "../Modules/Core/DirectX/DxSafeRelease.h"
-
-using Core::DirectX::SafeRelease;
-
-template <typename T>
-inline void SafeRelease(T** instance)
-{
-	if (instance != nullptr)
-	{
-		Core::DirectX::SafeRelease(*instance);
-	}
-}
-
 // ----- Link Libs -----
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -42,3 +29,7 @@ inline void SafeRelease(T** instance)
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+
+#include "../../../Module/Core/DirectX/DxSafeRelease.h"
+
+using namespace Core::DirectX;

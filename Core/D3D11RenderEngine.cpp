@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "D3D11RenderEngine.h"
 
-#include "FontManager.h"
+#include "../Font/FontManager.h"
 
 D3D11RenderEngine::D3D11RenderEngine()
 {
@@ -121,12 +121,12 @@ HRESULT D3D11RenderEngine::CreateDeviceResources()
 			);
 			if (FAILED(hr))
 			{
-				SafeRelease(&adapter);
+				SafeRelease(adapter);
 				return hr;
 			}
 		}
 
-		SafeRelease(&adapter);
+		SafeRelease(adapter);
 
 		// =========================================================
 		// 4) Device1 / Context1
@@ -136,8 +136,8 @@ HRESULT D3D11RenderEngine::CreateDeviceResources()
 		);
 		if (FAILED(hr))
 		{
-			SafeRelease(&baseDevice);
-			SafeRelease(&baseContext);
+			SafeRelease(baseDevice);
+			SafeRelease(baseContext);
 			return hr;
 		}
 
@@ -146,14 +146,14 @@ HRESULT D3D11RenderEngine::CreateDeviceResources()
 		);
 		if (FAILED(hr))
 		{
-			SafeRelease(&m_device);
-			SafeRelease(&baseDevice);
-			SafeRelease(&baseContext);
+			SafeRelease(m_device);
+			SafeRelease(baseDevice);
+			SafeRelease(baseContext);
 			return hr;
 		}
 
-		SafeRelease(&baseDevice);
-		SafeRelease(&baseContext);
+		SafeRelease(baseDevice);
+		SafeRelease(baseContext);
 	}
 
 
@@ -191,7 +191,7 @@ HRESULT D3D11RenderEngine::CreateDeviceResources()
 			&m_d2dDevice
 		);
 
-		SafeRelease(&dxgiDevice);
+		SafeRelease(dxgiDevice);
 
 		// =========================================================
 		// 7) D2D Device
@@ -236,14 +236,14 @@ void D3D11RenderEngine::ReleaseDeviceResources()
 		m_deviceContext->Flush();
 	}
 
-	SafeRelease(&m_writeFactory);
-	SafeRelease(&m_d2dDevice);
-	SafeRelease(&m_d2dFactory);
+	SafeRelease(m_writeFactory);
+	SafeRelease(m_d2dDevice);
+	SafeRelease(m_d2dFactory);
 
-	SafeRelease(&m_dxgiFactory);
+	SafeRelease(m_dxgiFactory);
 
-	SafeRelease(&m_deviceContext);
-	SafeRelease(&m_device);
+	SafeRelease(m_deviceContext);
+	SafeRelease(m_device);
 }
 
 bool D3D11RenderEngine::DiscardDevice()

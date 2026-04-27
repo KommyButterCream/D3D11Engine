@@ -6,7 +6,7 @@
 #define CAMERA_2D_API __declspec(dllimport)
 #endif
 
-#include "SmoothValue.h"
+#include "../util/SmoothValue.h"
 
 struct alignas(16) ViewParams
 {

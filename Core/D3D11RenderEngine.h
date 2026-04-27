@@ -6,7 +6,7 @@
 #define RENDER_ENGINE_API __declspec(dllimport)
 #endif
 
-#include "../Modules/D3D11EngineInterface/IRenderEngine.h"
+#include "../../../Module/D3D11EngineInterface/IRenderEngine.h"
 
 struct ID3D11Device1;
 struct ID3D11DeviceContext1;

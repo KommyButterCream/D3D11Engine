@@ -6,9 +6,9 @@
 #define RENDER_ENGINE_API __declspec(dllimport)
 #endif
 
-#include "../Modules/D3D11EngineInterface/IRenderContext.h"
+#include "../../../Module/D3D11EngineInterface/IRenderContext.h"
 
-#include "PtrArray.h"
+#include "../util/PtrArray.h"
 
 struct IDXGISwapChain1;
 struct ID3D11Texture2D;
