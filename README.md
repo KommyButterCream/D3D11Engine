@@ -13,12 +13,12 @@ Provides rendering engine/context abstractions, Direct2D/DirectWrite integration
 - UI / overlay rendering interface support
 - Font manager and text format caching
 - 2D camera utility for image/view control
-- Modular Core library integration via submodule
-- Separate D3D11 engine interface module via submodule
+- Modular integration with the shared Core library
+- Separate D3D11 engine interface project support
 
 # Dependencies
-- [Core](./Modules/Core) as a submodule
-- [D3D11EngineInterface](./Modules/D3D11EngineInterface) as a submodule
+- Core
+- D3D11EngineInterface
 - Windows Direct3D 11 / DXGI / Direct2D / DirectWrite
 - C++20
 - MSVC (Visual Studio 2022)
@@ -33,24 +33,26 @@ Provides rendering engine/context abstractions, Direct2D/DirectWrite integration
 - `Camera/` : 2D camera and view control utilities
 - `Font/` : font manager and DirectWrite text format cache
 - `Shader/` : HLSL shader sources
+- `Shaders/` : compiled or runtime shader resources
 - `util/` : timer, pointer array, smooth value helpers
-- `Modules/Core/` : external Core library submodule
-- `Modules/D3D11EngineInterface/` : engine interface definitions for plugins and external modules
 - `D3D11Engine/` : Visual Studio project files
 
+# Repository Layout
+This project expects D3D11Engine, Core, and D3D11EngineInterface to be placed under the same parent directory.
+
+Example:
+```text
+Module/
++-- Core/
++-- D3D11Engine/
++-- D3D11EngineInterface/
+```
+
+The Visual Studio solution references the shared Core project at `../Core/Core/Core.vcxproj`.
+The engine source also includes interface headers from `../D3D11EngineInterface/`.
+
 # Notes
-- This repository uses `Modules/Core` and `Modules/D3D11EngineInterface` as submodules.
-- Make sure submodules are initialized before building.
-- The project is configured for Windows-based development with Visual Studio 2022.
-- The main build target is a DLL-based rendering engine.
-
-# Clone
-- Clone with submodules:
-```bash
-git clone --recurse-submodules https://github.com/KommyButterCream/D3D11Engine.git
-```
-- If already cloned without submodules:
-```bash
-git submodule update --init --recursive
-```
-
+- The shared Core library is managed as a sibling repository/project.
+- D3D11EngineInterface is managed as a sibling repository/project.
+- Open `D3D11Engine.sln` with Visual Studio 2022.
+- Build the x64 configuration to produce the D3D11Engine DLL.
