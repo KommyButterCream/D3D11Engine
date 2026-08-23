@@ -65,6 +65,11 @@ public:
 
 	bool Update(float dt);
 
+	// 줌/팬 애니메이션이 모두 멈췄는지.
+	// 타일 스트리밍에서 "움직이는 중에는 새 타일을 만들지 않는다"는
+	// 모션 게이팅 판정에 사용한다.
+	bool IsSettled() const;
+
 	void GetViewParams(ViewParams& out) const;
 
 	bool ScreenToImage(float screenX, float screenY, float& outImageX, float& outImageY) const;
@@ -84,8 +89,15 @@ private:
 	uint32_t m_imageWidth = 1;
 	uint32_t m_imageHeight = 1;
 
-	static constexpr float minZoom = 0.05f;
+	// 절대 하한. 다만 이미지가 뷰포트보다 훨씬 크면 fit 배율이 이 값보다도
+	// 작아지므로(예: 40000px 이미지를 2160px 높이에 맞추면 0.027), 실제 하한은
+	// GetMinZoom() 에서 fit 배율까지 내려준다. 그러지 않으면 큰 이미지에서
+	// 휠 축소가 fit 보다 앞에서 막혀 화면이 튄다.
+	static constexpr float minZoomAbsolute = 0.05f;
 	static constexpr float maxZoom = 100.0f;
+
+	float GetFitZoom() const;
+	float GetMinZoom() const;
 
 	// Zoom
 	ZoomAnchor m_zoomAnchor; // 마우스 위치로 Zoom 을 하기 위해 사용

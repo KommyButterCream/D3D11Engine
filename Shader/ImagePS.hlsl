@@ -1,21 +1,23 @@
-// Texture2D ´ë½Å Texture2DArray »ç¿ë
-Texture2DArray texArray : register(t0); 
+// 4ì±„ë„(B8G8R8A8_UNORM) íƒ€ì¼/í…ìŠ¤ì²˜ìš© í”½ì…€ ì…°ì´ë”.
+// ë‹¨ì¼ ì±„ë„(R8_UNORM / R16_UNORM) ì†ŒìŠ¤ëŠ” ImageGrayPS.hlsl ì„ ì‚¬ìš©í•œë‹¤.
+
+Texture2DArray texArray : register(t0);
 SamplerState samp0 : register(s0);
 
 struct PS_IN
 {
     float4 pos : SV_POSITION;
     float2 uv : TEXCOORD0;
-    uint texIndex : TEXCOORD1; // VS¿¡¼­ ³Ñ¾î¿Â ÀÎµ¦½º
+    uint texIndex : TEXCOORD1; // VS ì—ì„œ ë„˜ì–´ì˜¨ ë°°ì—´ ì¸ë±ìŠ¤
 };
 
 float4 main(PS_IN input) : SV_TARGET
 {
-    // 32ºñÆ® Å¸ÀÏ Ç®¿¡¼­ »ùÇÃ¸µ (ÀÌ¹Ì BGRA µ¥ÀÌÅÍ°¡ µé¾îÀÖÀ½)
     float4 color = texArray.Sample(samp0, float3(input.uv, input.texIndex));
-    
-    // ¸¸¾à DXGI È­¸é Ä¸Ã³(BGRA)¿Í ÀÌ¹ÌÁö(RGBA)ÀÇ Ã¤³ÎÀÌ ¼¯ÀÎ´Ù¸é 
-    // ¿©±â¼­ .rgba ¶Ç´Â .bgra ·Î ½ºÀ§Áñ¸µÀ» Á¶Á¤ÇÒ ¼ö ÀÖ½À´Ï´Ù.
 
-    return color;
+    // ì•ŒíŒŒëŠ” í•­ìƒ 1.0 ìœ¼ë¡œ ê³ ì •í•œë‹¤.
+    // ë°±ë²„í¼ëŠ” D2D íƒ€ê¹ƒ ë¹„íŠ¸ë§µ(D2D1_ALPHA_MODE_PREMULTIPLIED)ê³¼ ê°™ì€ ì„œí”¼ìŠ¤ë¥¼
+    // ê³µìœ í•˜ë¯€ë¡œ, 4ì±„ë„ ì†ŒìŠ¤ì˜ ì•ŒíŒŒê°€ ê·¸ëŒ€ë¡œ ê¸°ë¡ë˜ë©´ D2D ê°€ ê·¸ ì„œí”¼ìŠ¤ë¥¼
+    // premultiplied ë¡œ í•´ì„í•´ ì˜¤ë²„ë ˆì´ê°€ ê²¹ì¹œ ì˜ì—­ì˜ ìƒ‰ì´ í‹€ì–´ì§„ë‹¤.
+    return float4(color.rgb, 1.0f);
 }

@@ -90,10 +90,10 @@
     <FxCompile Include="..\Shader\SingleConvertCS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Shader\TileSamplingCS.hlsl">
+    <FxCompile Include="..\Shader\WireFramePS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Shader\WireFramePS.hlsl">
+    <FxCompile Include="..\Shader\ImageGrayPS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

@@ -47,6 +47,32 @@ void Camera2D::Reset()
 	m_zoomAnchor.active = false;
 }
 
+float Camera2D::GetFitZoom() const
+{
+	const float sx = (float)m_viewWidth / (float)m_imageWidth;
+	const float sy = (float)m_viewHeight / (float)m_imageHeight;
+
+	return min(sx, sy);
+}
+
+float Camera2D::GetMinZoom() const
+{
+	// 이미지가 뷰포트보다 훨씬 크면 fit 배율이 절대 하한보다 작다.
+	// (예: 40000px 이미지를 2160px 높이에 맞추면 0.027 < 0.05)
+	// 그 경우 fit 배율까지 축소를 허용해야 전체 보기가 가능하다.
+	const float fitZoom = GetFitZoom();
+
+	return (fitZoom < minZoomAbsolute) ? fitZoom : minZoomAbsolute;
+}
+
+bool Camera2D::IsSettled() const
+{
+	return m_panState == PanState::Idle &&
+		m_zoom.IsAtTarget() &&
+		m_offsetX.IsAtTarget() &&
+		m_offsetY.IsAtTarget();
+}
+
 void Camera2D::Fit()
 {
 	// 목표 배율 계산
@@ -190,7 +216,7 @@ void Camera2D::Zoom(float delta)
 
 	m_zoom.target = std::clamp(
 		m_zoom.target * delta,
-		minZoom,
+		GetMinZoom(),
 		maxZoom
 	);
 }
@@ -213,7 +239,7 @@ void Camera2D::Zoom(float delta, float pivotX, float pivotY)
 
 	m_zoom.target = std::clamp(
 		m_zoom.target * delta,
-		minZoom,
+		GetMinZoom(),
 		maxZoom
 	);
 
