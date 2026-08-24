@@ -265,9 +265,14 @@ HRESULT D3D11RenderContext::CreateSwapChain(uint32_t width, uint32_t height)
 	sd.Stereo = FALSE;
 	sd.SampleDesc.Count = 1;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
+	// 온디맨드(dirty 기반) 렌더링이라 프레임 큐가 쌓이지 않으므로 2장으로 충분하다.
 	sd.BufferCount = 2;
 	sd.Scaling = DXGI_SCALING_STRETCH;
-	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+
+	// FLIP_DISCARD: BeginFrame 이 매 프레임 ClearRenderTargetView 를 하므로
+	// 백버퍼 내용을 재사용하지 않는다. DWM 이 대기 프레임을 버릴 수 있어
+	// FLIP_SEQUENTIAL 보다 효율적이다.
+	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	sd.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 	sd.Flags = 0;
 
@@ -294,6 +299,20 @@ HRESULT D3D11RenderContext::CreateSwapChain(uint32_t width, uint32_t height)
 		SafeRelease(m_swapChain);
 
 	m_swapChain = swapChain;
+
+	// 큐에 쌓을 프레임 수를 1 로 제한한다.
+	//
+	// DXGI 기본값은 3 이라 vsync 를 켜면 최대 3 refresh(60Hz 에서 약 50ms)
+	// 만큼 입력이 밀린다. 온디맨드 렌더링에는 큐를 쌓을 이유가 없다.
+	// 디바이스 단위 설정이므로 뷰어가 여러 개여도 같은 값이 들어간다(멱등).
+	IDXGIDevice1* dxgiDevice = nullptr;
+	if (SUCCEEDED(device->QueryInterface(__uuidof(IDXGIDevice1),
+		reinterpret_cast<void**>(&dxgiDevice))) && dxgiDevice)
+	{
+		dxgiDevice->SetMaximumFrameLatency(1);
+		SafeRelease(dxgiDevice);
+	}
+
 	return S_OK;
 }
 
@@ -474,6 +493,7 @@ bool D3D11RenderContext::HandleDeviceLost(HRESULT hr)
 		hr != DXGI_ERROR_DEVICE_RESET)
 		return false;
 
+
 	// 모든 리스너에게 알림을 먼저 전달
 	NotifyDeviceLost();
 
@@ -492,21 +512,41 @@ bool D3D11RenderContext::HandleDeviceLost(HRESULT hr)
 		m_engine->DiscardDevice();
 
 		if (!m_engine->RecreateDevice())
+		{
 			return false;
+		}
 	}
 
 	// 4. swapchain 재생성
 	if (FAILED(CreateSwapChain(m_width, m_height)))
+	{
 		return false;
+	}
 
 	// 5. backbuffer 리소스 재생성
 	if (FAILED(CreateBackBufferResources()))
+	{
 		return false;
+	}
 
 	// 6. 리스너에게 복구 완료 알림
+	//
+	// 위 단계 중 하나라도 실패해 여기 도달하지 못하면, 리스너는 OnDeviceLost 만
+	// 받은 채로 남는다. 그 상태로는 아무도 리소스를 되살리지 않아 화면이
+	// 영구히 비게 된다. 다음 프레임의 Present 가 다시 실패해 재시도로 이어지도록
+	// 실패 경로는 false 를 반환하고, 성공한 경우에만 복구를 통지한다.
 	NotifyDeviceRestored();
 
 	return true;
+}
+
+bool D3D11RenderContext::SimulateDeviceLost()
+{
+	// 테스트용. 디바이스 제거를 강제할 표준 D3D11 API 가 없으므로,
+	// 트리거만 생략하고 실제 로스트 경로를 그대로 실행한다.
+	// DiscardDevice/RecreateDevice 가 진짜로 디바이스를 파괴하고 다시 만들기
+	// 때문에 리스너 통지부터 리소스 재생성까지 전부 실제 동작이다.
+	return HandleDeviceLost(DXGI_ERROR_DEVICE_REMOVED);
 }
 
 void D3D11RenderContext::RequestResize(uint32_t newWidth, uint32_t newHeight)
@@ -604,14 +644,24 @@ bool D3D11RenderContext::EndFrame()
 	if (!m_swapChain)
 		return false;
 
-	//uint32_t syncInterval = 0;
-	//uint32_t flags = DXGI_PRESENT_DO_NOT_WAIT;
-
-	uint32_t syncInterval = 0;
-	//uint32_t flags = 0;
-
-	//uint32_t syncInterval = 1;
-	uint32_t flags = 0;
+	// ── 프레임 페이싱은 Present 가 담당한다.
+	//
+	// syncInterval = 0 은 flip 모델에서 티어링을 만들지 않는다. DWM 이 여전히
+	// vblank 에 합성하므로, refresh 보다 빠르게 밀어넣으면 그냥 앞 프레임이
+	// 폐기된다. 그러면 실제로 표시되는 프레임 간격이 불규칙해져서 매끄러운
+	// 애니메이션이 떨려 보인다(60Hz 화면에 120fps 를 밀던 상태).
+	//
+	// 1 로 두면 vblank 에 정렬되어 애니메이션이 균일해진다. 온디맨드
+	// 렌더링이라 유휴 시에는 Present 자체가 호출되지 않으므로 비용도 없다.
+	//
+	// 주의: 이걸 켠 뒤에는 렌더 스레드의 소프트웨어 FPS 제한을 refresh 근처로
+	// 두면 안 된다. 거의 같은 주기의 리미터 둘이 위상 간섭을 일으킨다.
+	// RenderThread::SetRenderFPS 는 안전망 상한으로만 쓴다.
+	//
+	// 라이브 카메라에서 1 refresh(60Hz 에서 약 16.7ms) 지연이 문제가 되면
+	// FRAME_LATENCY_WAITABLE_OBJECT 스왑체인으로 가야 한다.
+	const uint32_t syncInterval = m_vsyncEnabled ? 1u : 0u;
+	const uint32_t flags = 0;
 
 	HRESULT hr = m_swapChain->Present(syncInterval, flags);
 	if (hr == DXGI_STATUS_OCCLUDED || hr == DXGI_ERROR_WAS_STILL_DRAWING)

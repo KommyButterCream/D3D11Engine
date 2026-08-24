@@ -291,6 +291,27 @@ bool Camera2D::Update(float dt)
 {
 	constexpr float interpolationSpeed = 14.0f;
 
+	// ── 종료 판정 허용치
+	//
+	// 지수 보간의 꼬리는 화면에서 보이지 않는데도 오래 남는다. 실측(1024px,
+	// 클라이언트 961px, 휠 한 칸)에서 전체 35프레임 중 뒤쪽 16프레임이 이동량의
+	// 2.2% 만 처리했다. 그 구간은 정지해 보이는데 애니메이션은 계속 돌아서
+	// "멈춘 듯하다가 툭 끝나는" 느낌을 만든다.
+	//
+	// 그래서 "남은 변화가 화면에서 1픽셀 미만이면 끝난 것으로 본다"로 바꾼다.
+	//   zoom  : 화면 크기 * (Δzoom / zoom) < 1px  ->  ε = |target| / viewMin
+	//   anchor: 이미지 좌표이므로 Δ * zoom < 1px  ->  ε = 1 / zoom
+	const float viewMin = static_cast<float>(
+		(m_viewWidth < m_viewHeight) ? m_viewWidth : m_viewHeight);
+
+	const float zoomEpsilon = (viewMin > 1.0f)
+		? fmaxf(fabsf(m_zoom.target) / viewMin, 1e-5f)
+		: 1e-4f;
+
+	const float anchorEpsilon = (m_zoom.current > 1e-6f)
+		? fmaxf(1.0f / m_zoom.current, 1e-4f)
+		: 1e-4f;
+
 	// Zoom 보간
 	m_zoom.Update(dt, interpolationSpeed);
 
@@ -315,8 +336,9 @@ bool Camera2D::Update(float dt)
 		m_offsetY.target = m_offsetY.current;
 
 		// 모든 보간이 완료되었는지 확인
-		const bool zoomDone = m_zoom.IsAtTarget();
-		const bool anchorDone = !m_fitActive || (m_anchorImageX.IsAtTarget() && m_anchorImageY.IsAtTarget());
+		const bool zoomDone = m_zoom.IsAtTarget(zoomEpsilon);
+		const bool anchorDone = !m_fitActive ||
+			(m_anchorImageX.IsAtTarget(anchorEpsilon) && m_anchorImageY.IsAtTarget(anchorEpsilon));
 
 		if (zoomDone && anchorDone)
 		{
@@ -342,10 +364,20 @@ bool Camera2D::Update(float dt)
 		m_offsetX.Update(dt, interpolationSpeed);
 		m_offsetY.Update(dt, interpolationSpeed);
 
+		// Pan 오프셋도 이미지 좌표이므로 앵커와 같은 허용치를 쓴다.
 		const bool animating =
-			!m_zoom.IsAtTarget() ||
-			!m_offsetX.IsAtTarget() ||
-			!m_offsetY.IsAtTarget();
+			!m_zoom.IsAtTarget(zoomEpsilon) ||
+			!m_offsetX.IsAtTarget(anchorEpsilon) ||
+			!m_offsetY.IsAtTarget(anchorEpsilon);
+
+		if (!animating)
+		{
+			// 끝났다고 판정했으면 잔차를 남기지 않는다. 다음 프레임에 다시
+			// animating 으로 돌아가는 것을 막는다.
+			m_zoom.current = m_zoom.target;
+			m_offsetX.current = m_offsetX.target;
+			m_offsetY.current = m_offsetY.target;
+		}
 
 		return animating;
 	}

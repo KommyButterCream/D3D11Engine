@@ -101,6 +101,16 @@ public:
 	void Tick();
 	float GetFPS() const;
 
+	// 수직 동기. 기본 켜짐.
+	//
+	// 켜면 Present 가 vblank 에 정렬되어 애니메이션 간격이 균일해지지만
+	// 표시가 최대 1 refresh 늦는다. 라이브 카메라처럼 지연이 중요하면
+	// 끌 수 있다. 단 flip 모델에서 끈다는 것은 티어링이 아니라 프레임
+	// 폐기를 의미하므로, 끌 경우 RenderThread::SetRenderFPS 로 프레임 수를
+	// 화면 주사율 근처가 아닌 값으로 직접 제한해야 한다.
+	void SetVSyncEnabled(bool enable) { m_vsyncEnabled = enable; }
+	bool IsVSyncEnabled() const { return m_vsyncEnabled; }
+
 private:
 	// 내부 리소스 생성/해제
 	HRESULT CreateBackBufferResources();
@@ -108,6 +118,11 @@ private:
 
 	void    ReleaseAllResources();
 
+public:
+	// 테스트용 디바이스 로스트 유발. 실제 로스트 경로를 그대로 실행한다.
+	bool SimulateDeviceLost();
+
+private:
 	bool HandleDeviceLost(HRESULT hr);
 
 	// 실질적 SwapChain 생성
@@ -151,6 +166,9 @@ private:
 	// flags
 	bool    m_initialized = false;
 	bool    m_resourcesCreated = false;
+
+	// Present 의 syncInterval 을 결정한다. SetVSyncEnabled 참고.
+	bool m_vsyncEnabled = true;
 
 	bool m_inResize = false;
 	bool m_d2dDrawing = false;

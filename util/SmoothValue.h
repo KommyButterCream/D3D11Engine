@@ -29,9 +29,18 @@ public:
 		target = value;
 	}
 
+	// 지수 보간은 목표에 점근적으로만 접근하므로 꼬리가 무한히 길다.
+	// 고정 임계값(1e-4)은 값의 스케일을 모르기 때문에, 화면에서 이미 무의미한
+	// 구간을 수십 프레임 더 돌게 만든다. 호출자가 자기 단위에 맞는 허용치를
+	// 넘길 수 있도록 인자를 받는다.
+	inline bool IsAtTarget(float epsilon) const
+	{
+		return fabs(target - current) < epsilon;
+	}
+
 	inline bool IsAtTarget() const
 	{
-		return fabs(target - current) < 1e-4f;
+		return IsAtTarget(1e-4f);
 	}
 };
 
