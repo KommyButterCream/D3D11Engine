@@ -111,6 +111,10 @@ public:
 	void SetVSyncEnabled(bool enable) { m_vsyncEnabled = enable; }
 	bool IsVSyncEnabled() const { return m_vsyncEnabled; }
 
+	// 배경색(BeginFrame 의 Clear 색). 이미지 밖 여백에 보인다.
+	// r,g,b,a 는 0..1. 기본은 완전 투명 검정.
+	void SetBackgroundColor(float r, float g, float b, float a);
+
 private:
 	// 내부 리소스 생성/해제
 	HRESULT CreateBackBufferResources();
@@ -169,6 +173,9 @@ private:
 
 	// Present 의 syncInterval 을 결정한다. SetVSyncEnabled 참고.
 	bool m_vsyncEnabled = true;
+
+	// BeginFrame 의 ClearRenderTargetView 색
+	float m_backgroundColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	bool m_inResize = false;
 	bool m_d2dDrawing = false;

@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include "../../../Module/Core/ShapeType/Rect2i.h"
+#include "../../../Module/Core/ShapeType/Rect2f.h"
 
 #include <algorithm>
 
@@ -482,4 +483,124 @@ Core::ShapeType::Rect2i Camera2D::GetViewImageRect() const
 	rect.bottom = std::clamp(rect.bottom, 0, static_cast<int32_t>(m_imageHeight));
 
 	return rect;
+}
+
+/*---------------------------------------------------------
+	프로그램 제어 (호스트가 뷰를 직접 조작)
+---------------------------------------------------------*/
+void Camera2D::SetZoom(float zoom, bool animate)
+{
+	if (m_zoom.current <= 0.0f)
+		return;
+
+	// 앵커 기반 경로를 끄고 "화면 중심 유지" 로 동작시킨다.
+	m_fitActive = false;
+	m_zoomAnchor.active = false;
+
+	const float target = std::clamp(zoom, GetMinZoom(), maxZoom);
+
+	// 현재 화면 중심의 이미지 좌표를 새 배율에서도 유지한다.
+	const float centerImageX = m_offsetX.current + (m_viewWidth * 0.5f) / m_zoom.current;
+	const float centerImageY = m_offsetY.current + (m_viewHeight * 0.5f) / m_zoom.current;
+
+	const float newOffsetX = centerImageX - (m_viewWidth * 0.5f) / target;
+	const float newOffsetY = centerImageY - (m_viewHeight * 0.5f) / target;
+
+	if (animate)
+	{
+		m_zoom.SetTarget(target);
+		m_offsetX.SetTarget(newOffsetX);
+		m_offsetY.SetTarget(newOffsetY);
+	}
+	else
+	{
+		m_zoom.Snap(target);
+		m_offsetX.Snap(newOffsetX);
+		m_offsetY.Snap(newOffsetY);
+	}
+}
+
+void Camera2D::SetCenter(float imageX, float imageY, bool animate)
+{
+	m_fitActive = false;
+	m_zoomAnchor.active = false;
+
+	// 애니메이션 중이면 최종 배율을 기준으로 계산해야 목표가 흔들리지 않는다.
+	const float zoom = (m_zoom.target > 0.0f) ? m_zoom.target : m_zoom.current;
+	if (zoom <= 0.0f)
+		return;
+
+	const float offsetX = imageX - (m_viewWidth * 0.5f) / zoom;
+	const float offsetY = imageY - (m_viewHeight * 0.5f) / zoom;
+
+	if (animate)
+	{
+		m_offsetX.SetTarget(offsetX);
+		m_offsetY.SetTarget(offsetY);
+	}
+	else
+	{
+		m_offsetX.Snap(offsetX);
+		m_offsetY.Snap(offsetY);
+	}
+}
+
+void Camera2D::GetCenter(float& outImageX, float& outImageY) const
+{
+	if (m_zoom.current <= 0.0f)
+	{
+		outImageX = 0.0f;
+		outImageY = 0.0f;
+		return;
+	}
+
+	outImageX = m_offsetX.current + (m_viewWidth * 0.5f) / m_zoom.current;
+	outImageY = m_offsetY.current + (m_viewHeight * 0.5f) / m_zoom.current;
+}
+
+void Camera2D::ZoomToRect(const Core::ShapeType::Rect2f& imageRect,
+	float marginRatio, bool animate)
+{
+	const float width = imageRect.right - imageRect.left;
+	const float height = imageRect.bottom - imageRect.top;
+
+	if (width <= 0.0f || height <= 0.0f)
+		return;
+
+	// 여백은 사방으로 적용되므로 두 배로 늘린다.
+	const float inflate = 1.0f + ((marginRatio > 0.0f) ? marginRatio : 0.0f) * 2.0f;
+
+	const float zoomX = static_cast<float>(m_viewWidth) / (width * inflate);
+	const float zoomY = static_cast<float>(m_viewHeight) / (height * inflate);
+	const float target = std::clamp((zoomX < zoomY) ? zoomX : zoomY,
+		GetMinZoom(), maxZoom);
+
+	m_fitActive = false;
+	m_zoomAnchor.active = false;
+
+	const float centerX = (imageRect.left + imageRect.right) * 0.5f;
+	const float centerY = (imageRect.top + imageRect.bottom) * 0.5f;
+
+	const float offsetX = centerX - (m_viewWidth * 0.5f) / target;
+	const float offsetY = centerY - (m_viewHeight * 0.5f) / target;
+
+	if (animate)
+	{
+		m_zoom.SetTarget(target);
+		m_offsetX.SetTarget(offsetX);
+		m_offsetY.SetTarget(offsetY);
+	}
+	else
+	{
+		m_zoom.Snap(target);
+		m_offsetX.Snap(offsetX);
+		m_offsetY.Snap(offsetY);
+	}
+}
+
+void Camera2D::ImageToScreen(float imageX, float imageY,
+	float& outScreenX, float& outScreenY) const
+{
+	outScreenX = (imageX - m_offsetX.current) * m_zoom.current;
+	outScreenY = (imageY - m_offsetY.current) * m_zoom.current;
 }

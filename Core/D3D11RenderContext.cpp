@@ -633,8 +633,7 @@ bool D3D11RenderContext::BeginFrame()
 	context->RSSetViewports(1, &vp);
 
 	// Clear
-	float backgroundColor[4] = { 0.f, 0.f, 0.f, 0.f };
-	context->ClearRenderTargetView(m_rtv, backgroundColor);
+	context->ClearRenderTargetView(m_rtv, m_backgroundColor);
 
 	return true;
 }
@@ -807,4 +806,12 @@ bool D3D11RenderContext::ConsumeResize(LONG& outWidth, LONG& outHeight)
 	outHeight = InterlockedExchange(&m_pendingResize.height, 0);
 
 	return true;
+}
+
+void D3D11RenderContext::SetBackgroundColor(float r, float g, float b, float a)
+{
+	m_backgroundColor[0] = r;
+	m_backgroundColor[1] = g;
+	m_backgroundColor[2] = b;
+	m_backgroundColor[3] = a;
 }

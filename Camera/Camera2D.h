@@ -35,6 +35,7 @@ enum class PanState
 namespace Core::ShapeType
 {
 	struct Rect2i;
+	struct Rect2f;
 }
 
 class CAMERA_2D_API Camera2D
@@ -81,6 +82,25 @@ public:
 	float GetOffsetY() const { return m_offsetY.current; }
 
 	Core::ShapeType::Rect2i GetViewImageRect() const;
+
+	// ── 프로그램 제어용 (호스트가 뷰를 직접 조작할 때)
+	//
+	// 기존 Zoom(delta) 는 배율 곱셈이라 "이 값으로 맞춰라" 를 표현할 수 없었다.
+	// animate = false 면 보간 없이 즉시 반영한다.
+	void SetZoom(float zoom, bool animate = true);
+
+	// 이미지 좌표 (imageX, imageY) 가 화면 중앙에 오게 한다.
+	void SetCenter(float imageX, float imageY, bool animate = true);
+	void GetCenter(float& outImageX, float& outImageY) const;
+
+	// imageRect 가 화면에 꽉 차도록 배율과 중심을 함께 맞춘다.
+	// marginRatio 는 여백 비율(0.1 = 사방 10%).
+	void ZoomToRect(const Core::ShapeType::Rect2f& imageRect,
+		float marginRatio = 0.1f, bool animate = true);
+
+	// ScreenToImage 의 역변환.
+	void ImageToScreen(float imageX, float imageY,
+		float& outScreenX, float& outScreenY) const;
 
 private:
 	uint32_t m_viewWidth = 1;
