@@ -96,5 +96,8 @@
     <FxCompile Include="..\Shader\ImageGrayPS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Shader\ImageGrayLutPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
