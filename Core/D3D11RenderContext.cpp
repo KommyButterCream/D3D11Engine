@@ -438,6 +438,7 @@ void D3D11RenderContext::ReleaseBackBufferResources()
 	// D3D - Unbind OM targets
 	if (m_engine)
 	{
+		D3D11ImmediateContextGuard contextGuard(m_engine->GetImmediateContextGate());
 		if (ID3D11DeviceContext1* context = m_engine->GetD3DDeviceContext())
 		{
 			context->OMSetRenderTargets(0, nullptr, nullptr);
@@ -479,6 +480,7 @@ void D3D11RenderContext::ReleaseAllResources()
 
 	if (m_engine)
 	{
+		D3D11ImmediateContextGuard contextGuard(m_engine->GetImmediateContextGate());
 		if (auto* ctx = m_engine->GetD3DDeviceContext())
 		{
 			ctx->ClearState();
@@ -612,28 +614,31 @@ bool D3D11RenderContext::BeginFrame()
 		return false;
 	}
 
-	ID3D11DeviceContext* context = m_engine->GetD3DDeviceContext();
-	if (!context)
-		return false;
-
 	if (!m_rtv)
 		return false;
 
-	// OM
-	context->OMSetRenderTargets(1, &m_rtv, nullptr);
+	{
+		D3D11ImmediateContextGuard contextGuard(m_engine->GetImmediateContextGate());
+		ID3D11DeviceContext* context = m_engine->GetD3DDeviceContext();
+		if (!context)
+			return false;
 
-	D3D11_VIEWPORT vp = {};
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	vp.Width = static_cast<FLOAT>(m_width);
-	vp.Height = static_cast<FLOAT>(m_height);
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0;
+		// OM
+		context->OMSetRenderTargets(1, &m_rtv, nullptr);
 
-	context->RSSetViewports(1, &vp);
+		D3D11_VIEWPORT vp = {};
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		vp.Width = static_cast<FLOAT>(m_width);
+		vp.Height = static_cast<FLOAT>(m_height);
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0;
 
-	// Clear
-	context->ClearRenderTargetView(m_rtv, m_backgroundColor);
+		context->RSSetViewports(1, &vp);
+
+		// Clear
+		context->ClearRenderTargetView(m_rtv, m_backgroundColor);
+	}
 
 	return true;
 }
@@ -693,9 +698,12 @@ bool D3D11RenderContext::BeginOverlay()
 	m_inOverlay = true;
 
 	// D3D OM unbind
-	if (ID3D11DeviceContext1* context = m_engine->GetD3DDeviceContext())
 	{
-		context->OMSetRenderTargets(0, nullptr, nullptr);
+		D3D11ImmediateContextGuard contextGuard(m_engine->GetImmediateContextGate());
+		if (ID3D11DeviceContext1* context = m_engine->GetD3DDeviceContext())
+		{
+			context->OMSetRenderTargets(0, nullptr, nullptr);
+		}
 	}
 	m_d2dContext->SetTarget(m_d2dTargetBitmap);
 

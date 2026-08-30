@@ -12,6 +12,15 @@ D3D11RenderEngine::~D3D11RenderEngine()
 	Shutdown();
 }
 
+bool D3D11RenderEngine::SetImmediateContextGateEnabled(bool enabled)
+{
+	if (m_initialized)
+		return false;
+
+	m_immediateContextGate.SetEnabled(enabled);
+	return true;
+}
+
 bool D3D11RenderEngine::Initialize(const RenderEngineConfig& config)
 {
 	if (m_initialized)
@@ -44,6 +53,8 @@ void D3D11RenderEngine::Shutdown()
 
 HRESULT D3D11RenderEngine::CreateDeviceResources()
 {
+	D3D11ImmediateContextGuard contextGuard(GetImmediateContextGate());
+
 	HRESULT hr = S_OK;
 
 	if (m_config.initD3D)
@@ -224,6 +235,8 @@ HRESULT D3D11RenderEngine::CreateDeviceResources()
 
 void D3D11RenderEngine::ReleaseDeviceResources()
 {
+	D3D11ImmediateContextGuard contextGuard(GetImmediateContextGate());
+
 	if (m_fontManager)
 	{
 		delete m_fontManager;

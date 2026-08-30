@@ -7,6 +7,7 @@
 #endif
 
 #include "../../../Module/D3D11EngineInterface/IRenderEngine.h"
+#include "D3D11ImmediateContextGate.h"
 
 struct ID3D11Device1;
 struct ID3D11DeviceContext1;
@@ -33,6 +34,12 @@ public:
 	virtual bool DiscardDevice() override;
 	virtual bool RecreateDevice() override;
 
+	// This setting can only be changed before Initialize(). Every user of this
+	// engine's immediate context shares the same gate.
+	bool SetImmediateContextGateEnabled(bool enabled);
+	bool IsImmediateContextGateEnabled() const { return m_immediateContextGate.IsEnabled(); }
+	ID3D11ImmediateContextGate* GetImmediateContextGate() { return &m_immediateContextGate; }
+
 	// Getter
 	ID3D11Device1* GetD3DDevice() const { return m_device; }
 	ID3D11DeviceContext1* GetD3DDeviceContext() const { return m_deviceContext; }
@@ -51,6 +58,9 @@ private:
 
 	bool m_initialized = false;
 	bool m_deviceAvailable = false;
+
+	// D3D11DeviceContext lock
+	D3D11ImmediateContextGate m_immediateContextGate;
 
 	// D3D
 	ID3D11Device1* m_device = nullptr;

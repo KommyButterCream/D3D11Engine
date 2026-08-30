@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Camera\Camera2D.h" />
+    <ClInclude Include="..\Core\D3D11ImmediateContextGate.h" />
     <ClInclude Include="..\Core\D3D11RenderContext.h" />
     <ClInclude Include="..\Core\D3D11RenderEngine.h" />
     <ClInclude Include="..\Font\FontManager.h" />
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Camera\Camera2D.cpp" />
+    <ClCompile Include="..\Core\D3D11ImmediateContextGate.cpp" />
     <ClCompile Include="..\Core\D3D11RenderContext.cpp" />
     <ClCompile Include="..\Core\D3D11RenderEngine.cpp" />
     <ClCompile Include="..\Font\FontManager.cpp" />

@@ -32,6 +32,9 @@
     <ClInclude Include="..\Camera\Camera2D.h">
       <Filter>Camera</Filter>
     </ClInclude>
+    <ClInclude Include="..\Core\D3D11ImmediateContextGate.h">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="..\Core\D3D11RenderContext.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -60,6 +63,9 @@
     </ClCompile>
     <ClCompile Include="..\Camera\Camera2D.cpp">
       <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Core\D3D11ImmediateContextGate.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Core\D3D11RenderContext.cpp">
       <Filter>Core</Filter>
