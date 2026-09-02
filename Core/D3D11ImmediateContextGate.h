@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef GRAPHICS_ENGINE_DLL
+#define IMMEDIATE_CONTEXT_GATE_API __declspec(dllexport)
+#else
+#define IMMEDIATE_CONTEXT_GATE_API __declspec(dllimport)
+#endif
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -7,7 +13,7 @@
 
 #include "../../../Module/D3D11EngineInterface/ID3D11ImmediateContextGate.h"
 
-class D3D11ImmediateContextGate final : public ID3D11ImmediateContextGate
+class IMMEDIATE_CONTEXT_GATE_API D3D11ImmediateContextGate final : public ID3D11ImmediateContextGate
 {
 public:
 	D3D11ImmediateContextGate() = default;
