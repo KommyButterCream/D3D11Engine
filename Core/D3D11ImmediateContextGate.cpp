@@ -3,7 +3,7 @@
 
 bool D3D11ImmediateContextGate::Enter()
 {
-	if (::InterlockedCompareExchange(&m_enabled, FALSE, FALSE) == FALSE)
+	if (::ReadAcquire(&m_enabled) == FALSE)
 		return false;
 
 	::AcquireSRWLockExclusive(&m_lock);
@@ -17,7 +17,7 @@ void D3D11ImmediateContextGate::Leave()
 
 bool D3D11ImmediateContextGate::IsEnabled() const
 {
-	return ::InterlockedCompareExchange(&m_enabled, FALSE, FALSE) != FALSE;
+	return ::ReadAcquire(&m_enabled) != FALSE;
 }
 
 void D3D11ImmediateContextGate::SetEnabled(bool enabled)
